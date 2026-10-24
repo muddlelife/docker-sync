@@ -1,0 +1,53 @@
+[package]
+name = "docker-sync"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "docker_sync"
+
+[[bin]]
+name = "docker-sync-web"
+required-features = ["web"]
+
+[[bin]]
+name = "sync-runner"
+required-features = ["runner"]
+
+[features]
+default = ["web", "runner"]
+web = ["dep:crypto_box", "dep:argon2", "dep:async-trait", "dep:chrono", "dep:reqwest", "dep:rocket", "dep:rocket_dyn_templates", "dep:rusqlite", "dep:zip", "dep:tempfile"]
+runner = ["dep:clap", "dep:tempfile"]
+
+[dependencies]
+aes-gcm = "0.10"
+argon2 = { version = "0.5", optional = true }
+async-trait = { version = "0.1", optional = true }
+base64 = "0.22"
+crypto_box = { version = "0.9", features = ["seal"], optional = true }
+chrono = { version = "0.4", features = ["serde"], optional = true }
+clap = { version = "4", features = ["derive"], optional = true }
+hex = "0.4"
+rand = "0.8"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"], optional = true }
+rocket = { version = "0.5.1", features = ["json"], optional = true }
+rocket_dyn_templates = { version = "0.2", features = ["tera"], optional = true }
+rusqlite = { version = "0.37", features = ["bundled"], optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+tempfile = { version = "3", optional = true }
+thiserror = "2"
+url = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+zip = { version = "2", default-features = false, features = ["deflate"], optional = true }
+
+[dev-dependencies]
+wiremock = "0.6"
+
+[profile.release]
+strip = true
+lto = "thin"
+opt-level = "s"
+codegen-units = 1

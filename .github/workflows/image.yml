@@ -1,0 +1,139 @@
+name: 发布服务和同步工具镜像
+on:
+  push:
+    branches: [main]
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - Dockerfile
+      - Dockerfile.runner
+      - src/**
+      - migrations/**
+      - templates/**
+      - static/**
+      - .github/workflows/image.yml
+      - workflows/web-sync.yml
+      - tests/runner_container_test.py
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: publish-web-image
+  cancel-in-progress: true
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 镜像名称
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          tags: ${{ steps.image.outputs.name }}:${{ github.sha }}-${{ matrix.arch }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=web-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=web-${{ matrix.arch }}
+      - name: 校验运行镜像体积（不超过 32 MiB）
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}:${{ github.sha }}-${{ matrix.arch }}
+        run: |
+          docker pull "$IMAGE"
+          size=$(docker image inspect "$IMAGE" --format '{{.Size}}')
+          echo "Uncompressed image size: $size bytes"
+          test "$size" -le 33554432
+  runner:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 同步工具镜像名称
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.runner
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          tags: ${{ steps.image.outputs.name }}:runner-${{ github.sha }}-${{ matrix.arch }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=runner-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=runner-${{ matrix.arch }}
+      - name: 验证预编译执行器及 Skopeo
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}:runner-${{ github.sha }}-${{ matrix.arch }}
+        run: |
+          docker pull "$IMAGE"
+          docker run --rm --entrypoint /usr/bin/skopeo "$IMAGE" --version
+          if docker run --rm --env TASK_PROTOCOL_VERSION=1 --env SYNC_PAYLOAD_KEY= "$IMAGE" execute > runner-error.log 2>&1; then
+            echo "::error::执行器未拒绝缺失的任务密钥"
+            exit 1
+          fi
+          grep -q 'SYNC_PAYLOAD_KEY' runner-error.log
+      - name: 验证真实 Skopeo 的全部架构、AMD64、ARM64 同步
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}:runner-${{ github.sha }}-${{ matrix.arch }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/runner-smoke"
+          "$RUNNER_TEMP/runner-smoke/bin/pip" install --disable-pip-version-check cryptography
+          "$RUNNER_TEMP/runner-smoke/bin/python" tests/runner_container_test.py --image "$IMAGE"
+  manifest:
+    needs: [build, runner]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 发布同步工具和 Web 的 AMD64、ARM64 合集
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker buildx imagetools create \
+            -t "$image:runner" -t "$image:runner-$GITHUB_SHA" \
+            "$image:runner-$GITHUB_SHA-amd64" "$image:runner-$GITHUB_SHA-arm64"
+          docker buildx imagetools create \
+            -t "$image:latest" -t "$image:$GITHUB_SHA" \
+            "$image:$GITHUB_SHA-amd64" "$image:$GITHUB_SHA-arm64"

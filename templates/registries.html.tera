@@ -1,0 +1,11 @@
+{% extends "base" %}{% block content %}
+<div class="page-heading"><div><h1>目标仓库</h1><p class="muted">集中配置仓库地址和访问凭据。</p></div><button id="new-registry" class="primary">＋ 添加仓库</button></div>
+<section class="panel list-panel"><div id="registry-list" class="table-wrap"><p class="loading">正在读取仓库…</p></div><div id="registries-pagination" class="pagination" aria-label="分页"></div></section>
+<dialog class="panel editor" aria-modal="true" aria-labelledby="registry-editor-title" id="registry-editor" hidden><div class="panel-heading"><h2 id="registry-editor-title">添加仓库</h2><button type="button" data-close="registry-editor" class="link-button">关闭</button></div>
+<form id="registry-form" class="panel-body"><div class="notice error" data-editor-notice role="alert" hidden></div><input type="hidden" name="id"><input type="hidden" name="provider" value="aliyun_acr">
+<div class="form-grid"><div><label for="registry-name">显示名称</label><input id="registry-name" name="name" placeholder="阿里云 · 主仓库" required maxlength="100"></div><div><label>平台</label><input value="阿里云 ACR" disabled></div></div>
+<label for="endpoint">仓库地址</label><input id="endpoint" name="endpoint" placeholder="registry.cn-hangzhou.aliyuncs.com" required><p class="help">填写 ACR 控制台给出的域名，不包含 https:// 或命名空间。</p>
+<div class="form-grid"><div><label for="namespace">命名空间</label><input id="namespace" name="namespace" required></div><div><label for="username">登录用户名</label><input id="username" name="username" autocomplete="username" required></div></div>
+<label for="registry-password">仓库密码</label><input id="registry-password" name="password" type="password" autocomplete="new-password" placeholder="修改时留空保留">
+<label class="check"><input type="checkbox" name="enabled" checked>启用此仓库</label><div class="form-actions"><button class="primary" type="submit">保存仓库</button></div></form></dialog>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base" %}{% block content %}
+<div class="page-heading"><div><h1>账户安全</h1><p class="muted">修改管理员登录密码，保护你的镜像同步配置。</p></div></div>
+<section class="panel account-panel"><div class="panel-heading"><h2>修改密码</h2></div>
+<form id="password-form" class="panel-body">
+<label for="current-password">当前密码</label><input id="current-password" name="current_password" type="password" autocomplete="current-password" required maxlength="1024">
+<label for="new-password">新密码</label><input id="new-password" name="new_password" type="password" autocomplete="new-password" required maxlength="256" aria-describedby="password-help">
+<p id="password-help" class="help">使用 12 至 128 个字符，建议组合字母、数字和符号。</p>
+<label for="confirm-password">确认新密码</label><input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" required maxlength="256">
+<p class="help">修改成功后，所有已登录设备都需要使用新密码重新登录。</p>
+<div class="form-actions"><button type="submit" class="primary">修改密码</button></div>
+</form></section>
+{% endblock %}

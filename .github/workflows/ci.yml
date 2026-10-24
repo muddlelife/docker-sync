@@ -1,0 +1,23 @@
+name: Rust 验证
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo test --locked
+      - run: node --test tests/ui_test.cjs
+      - run: cargo check --locked --no-default-features --features web --bin docker-sync-web
+      - run: cargo check --locked --no-default-features --features runner --bin sync-runner

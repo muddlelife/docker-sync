@@ -1,0 +1,15 @@
+services:
+  web:
+    image: ${DOCKER_SYNC_IMAGE:-ghcr.io/muddlelife/docker-sync:latest}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${PORT:-8000}:8000"
+    environment:
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - sync-data:/data
+volumes:
+  sync-data:

@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1
+FROM rust:1-alpine AS builder
+WORKDIR /app
+ARG CARGO_BUILD_JOBS=2
+ARG TARGETARCH
+RUN apk add --no-cache build-base pkgconf
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+RUN --mount=type=cache,id=docker-sync-registry,target=/usr/local/cargo/registry,sharing=locked \
+    --mount=type=cache,id=docker-sync-runner-${TARGETARCH},target=/app/target,sharing=locked \
+    cargo build --locked --release --jobs $CARGO_BUILD_JOBS --no-default-features --features runner --bin sync-runner \
+    && cp target/release/sync-runner /sync-runner
+
+FROM alpine:3.24
+RUN apk add --no-cache skopeo ca-certificates
+COPY --from=builder /sync-runner /app/sync-runner
+ENV HOME=/tmp XDG_CONFIG_HOME=/tmp/.config XDG_RUNTIME_DIR=/tmp
+USER 10001:10001
+WORKDIR /tmp
+ENTRYPOINT ["/app/sync-runner"]

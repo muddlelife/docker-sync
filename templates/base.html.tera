@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#2165f5"><title>{{ title }} · Docker Sync</title><link rel="icon" type="image/svg+xml" href="/static/logo.svg"><link rel="stylesheet" href="/static/app.css"><script defer src="/static/app.js"></script></head>
+<body data-page="{{ page }}"{% if task_id is defined %} data-task-id="{{ task_id }}"{% endif %}>
+{% if page != "login" %}
+<aside class="sidebar"><a class="brand" href="/"><img src="/static/logo.svg" alt="" width="40" height="40"><span>Docker Sync<small>镜像同步控制台</small></span></a><p class="nav-label">工作空间</p>
+<nav aria-label="主导航">
+<a href="/"{% if page == "dashboard" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#overview"/></svg><span>同步概览</span></a>
+<a href="/rules"{% if page == "rules" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#rules"/></svg><span>镜像规则</span></a>
+<a href="/images"{% if page == "images" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#images"/></svg><span>仓库镜像</span></a>
+<a href="/registries"{% if page == "registries" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#registry"/></svg><span>目标仓库</span></a>
+<a href="/tasks"{% if page == "tasks" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#tasks"/></svg><span>同步任务</span></a>
+<a href="/settings"{% if page == "settings" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#settings"/></svg><span>连接设置</span></a>
+<a href="/account"{% if page == "account" %} class="active" aria-current="page"{% endif %}><svg aria-hidden="true"><use href="/static/icons.svg#lock"/></svg><span>账户安全</span></a>
+</nav><div class="sidebar-note"><span class="dot"></span> 轻量部署 · 多架构同步</div><div class="sidebar-foot"><span class="avatar">管</span><span>管理员<small>个人工作区</small></span><button class="icon-button" id="logout" aria-label="退出登录" title="退出登录"><svg aria-hidden="true"><use href="/static/icons.svg#exit"/></svg></button></div></aside>
+{% endif %}
+<main class="{% if page == 'login' %}login-layout{% else %}workspace{% endif %}">
+{% if page != "login" %}<header class="topbar"><span class="breadcrumb">工作空间 <span>/</span> <strong>{{ title }}</strong></span><span class="topbar-account"><span class="status-dot"></span> 管理控制台</span></header>{% endif %}
+<div class="content"><div id="notice" class="notice" role="status" aria-live="polite" hidden></div>{% block content %}{% endblock %}</div>
+</main></body></html>

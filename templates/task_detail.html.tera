@@ -1,0 +1,5 @@
+{% extends "base" %}{% block content %}
+<div class="page-heading"><div><h1>任务详情</h1><p class="muted mono">{{ task_id }}</p></div><a class="button" href="/tasks">← 返回任务列表</a></div>
+<section class="panel list-panel"><div class="panel-heading"><h2>执行状态</h2><div id="task-actions" class="actions"></div></div><div class="panel-body" id="task-status"><p class="loading">正在读取任务…</p></div><div id="task-items" class="table-wrap"></div><div id="items-pagination" class="pagination" aria-label="分页"></div></section>
+<section class="panel log-panel"><div class="panel-heading"><h2>执行日志</h2><button id="load-logs">加载日志</button></div><p class="panel-body help">任务完成后可加载日志；运行中可通过 GitHub 链接查看进度。</p><pre id="task-logs" class="log-output" hidden></pre></section>
+{% endblock %}

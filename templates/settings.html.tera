@@ -1,0 +1,10 @@
+{% extends "base" %}{% block content %}
+<div class="page-heading"><div><h1>连接设置</h1><p class="muted">连接 GitHub 执行仓库，初始化后即可从控制台发起同步。</p></div></div>
+<div class="split"><section class="panel"><div class="panel-heading"><h2>GitHub 连接</h2><span id="connection-status"><span class="pill neutral">待初始化</span></span></div><form id="settings-form" class="panel-body">
+<p id="connection-hint" class="connection-hint">保存并初始化连接后，即可开始同步。</p>
+<div class="form-grid"><div><label for="owner">仓库所有者</label><input id="owner" name="owner" placeholder="GitHub 用户名或组织名" required></div><div><label for="repo">执行仓库名称</label><input id="repo" name="repo" placeholder="例如 image-sync" required></div></div>
+<label for="branch">执行分支</label><input id="branch" name="branch" value="main" required><p class="help">同步工作流需上传到默认分支；执行分支也需原样上传同一份最新工作流。</p>
+<label for="token">GitHub Token</label><input id="token" name="token" type="password" autocomplete="new-password" placeholder="首次填写；更新时留空保留"><p class="help" id="token-state">仅授权执行仓库，开启 Actions 和 Secrets 读写权限；私有仓库还需 Contents 只读。</p>
+<div class="form-actions"><button class="primary" type="submit">保存并初始化</button></div><p class="help after-actions">任务密钥由系统自动配置，无需手工生成或复制。</p></form></section>
+<aside class="panel guide"><h2>三步连接 GitHub</h2><ol class="setup-steps"><li><strong>准备执行仓库</strong><p><a href="/api/settings/workflow" download="web-sync.yml">下载同步工作流</a>，上传至仓库的 <code>.github/workflows/web-sync.yml</code>，并启用 Actions。</p></li><li><strong>创建访问 Token</strong><p>创建 Fine-grained Token，只选择该执行仓库，授予 <b>Actions</b> 和 <b>Secrets</b> 的 <b>Read and write</b> 权限；私有仓库还需 <b>Contents: Read-only</b>。</p></li><li><strong>保存并初始化</strong><p>填写左侧信息，点击“保存并初始化”。显示“已就绪”后即可添加仓库和镜像规则。</p></li></ol><div class="guide-note">升级已有服务时，请先更新执行仓库中的同步工作流。</div></aside></div>
+{% endblock %}

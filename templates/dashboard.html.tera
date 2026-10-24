@@ -1,0 +1,7 @@
+{% extends "base" %}{% block content %}
+<div class="page-heading"><div><h1>同步概览</h1><p class="muted">掌握镜像同步状态，管理你的镜像仓库。</p></div><a class="button primary" href="/rules"><svg aria-hidden="true"><use href="/static/icons.svg#plus"/></svg>添加镜像规则</a></div>
+<div class="metrics" id="metrics"><div class="metric"><span>镜像规则<svg aria-hidden="true"><use href="/static/icons.svg#rules"/></svg></span><strong>—</strong><small>已配置的同步规则</small></div><div class="metric"><span>同步成功<svg aria-hidden="true"><use href="/static/icons.svg#check"/></svg></span><strong class="green">—</strong><small>当前规则的最新结果</small></div><div class="metric"><span>进行中任务<svg aria-hidden="true"><use href="/static/icons.svg#clock"/></svg></span><strong class="blue">—</strong><small>等待、同步及结果核实</small></div><div class="metric"><span>目标仓库<svg aria-hidden="true"><use href="/static/icons.svg#registry"/></svg></span><strong>—</strong><small>已连接的镜像仓库</small></div></div>
+<div class="overview-grid"><section class="panel list-panel"><div class="panel-heading"><h2>镜像同步状态</h2><a href="/rules">管理规则 →</a></div><div id="recent-rules" class="table-wrap"><p class="loading">正在读取镜像状态…</p></div></section>
+<section class="panel list-panel"><div class="panel-heading"><h2>最近同步任务</h2><a href="/tasks">查看全部 →</a></div><div id="recent-tasks" class="table-wrap"><p class="loading">正在读取任务…</p></div></section>
+</div>
+{% endblock %}
